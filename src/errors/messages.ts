@@ -13,4 +13,7 @@ export const messages: ErrorMessages = {
     `The file or directory at "${path}" was not found.`,
   permissionDenied: (path: string) =>
     `Permission denied for accessing "${path}".`,
+  collectorError: (customId: string) =>
+    `An error ocurred while starting collector for ${customId}.`,
+  modalInputError: `Not enough inputs to create modal.`,
 };

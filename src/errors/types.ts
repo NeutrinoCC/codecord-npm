@@ -6,4 +6,6 @@ export enum APIError {
   accessError = "accessError",
   fileNotFound = "fileNotFound",
   permissionDenied = "permissionDenied",
+  collectorError = "collectorError",
+  modalInputError = "modalInputError",
 }
