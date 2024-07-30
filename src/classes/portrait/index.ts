@@ -1,4 +1,4 @@
-import { ThreadMemberFlagsBitField } from "discord.js";
+import { AttachmentBuilder, ThreadMemberFlagsBitField } from "discord.js";
 import { calculateCoordinateReference } from "./functions";
 import {
   PortraitConstructor,
@@ -25,6 +25,14 @@ export class Portrait {
     return this.canvas.toBuffer();
   }
 
+  async createAttachment(name: string) {
+    const buffer = this.canvas.toBuffer();
+
+    return new AttachmentBuilder(buffer, {
+      name,
+    });
+  }
+
   async drawImage({
     imageURL,
     size,
@@ -40,8 +48,8 @@ export class Portrait {
 
     const image = await loadImage(imageURL);
 
-    let imageWidth = (image.width / 100) * size;
-    let imageHeight = (image.height / 100) * size;
+    let imageWidth = image.width * size;
+    let imageHeight = image.height * size;
 
     // Calculate the x and y coordinates
 

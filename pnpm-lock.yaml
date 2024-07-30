@@ -11,6 +11,9 @@ importers:
       canvas:
         specifier: ^2.11.2
         version: 2.11.2
+      color-thief-node:
+        specifier: ^1.0.4
+        version: 1.0.4
       discord.js:
         specifier: ^14.15.3
         version: 14.15.3
@@ -465,6 +468,9 @@ packages:
   color-support@1.1.3:
     resolution: {integrity: sha512-qiBjkpbMLO/HL68y+lh4q0/O1MZFj2RX6X/KmMa3+gJD3z+WwI1ZzDHysvqHGS3mP6mznPckpXmw1nI9cJjyRg==}
     hasBin: true
+
+  color-thief-node@1.0.4:
+    resolution: {integrity: sha512-ZcGpyUnmjJISUjDwRv+DM8ySpT/Jp9BOiEPQfAXWsDF6WT3XAPIPzIRLXdKh4ZbTkhZCvYZgTo8A7hHRvxcUnQ==}
 
   commander@4.1.1:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
@@ -1427,6 +1433,13 @@ snapshots:
   color-name@1.1.4: {}
 
   color-support@1.1.3: {}
+
+  color-thief-node@1.0.4:
+    dependencies:
+      canvas: 2.11.2
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   commander@4.1.1: {}
 
