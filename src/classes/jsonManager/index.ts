@@ -11,7 +11,7 @@ export class JsonManager {
     this._writeJsonFile({});
   }
 
-  _writeJsonFile(data: any) {
+  private _writeJsonFile(data: any) {
     //if (!access(this.filePath)) throw new Error();
 
     if (!data) return;
@@ -19,11 +19,11 @@ export class JsonManager {
     fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2));
   }
 
-  async _readJsonFile() {
+  private async _readJsonFile() {
     if (!access(this.filePath)) throw new Error();
 
     const fileData = await fsPromises.readFile(this.filePath, "utf8");
-    const content: { [key: string]: any } = JSON.parse(fileData);
+    const content: any = JSON.parse(fileData);
 
     return content;
   }

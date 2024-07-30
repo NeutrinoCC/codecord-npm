@@ -16,4 +16,5 @@ export const messages: ErrorMessages = {
   collectorError: (customId: string) =>
     `An error ocurred while starting collector for ${customId}.`,
   modalInputError: `Not enough inputs to create modal.`,
+  noTextChannel: (name: string) => `${name} no es un canal de texto.`,
 };

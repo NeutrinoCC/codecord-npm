@@ -8,4 +8,5 @@ export enum APIError {
   permissionDenied = "permissionDenied",
   collectorError = "collectorError",
   modalInputError = "modalInputError",
+  noTextChannel = "noTextChannel",
 }
