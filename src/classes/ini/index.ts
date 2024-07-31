@@ -47,8 +47,10 @@ export class Ini {
 
  */
 
-  static get(query: string): string | number | boolean | null {
+  static get(query?: string): string | number | boolean | null {
     const fileContent = readIniFile();
+
+    if (!query) return fileContent;
 
     const regex = new RegExp(`^${query}=([^\\s]+)`, "m");
 
