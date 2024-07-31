@@ -1,25 +1,24 @@
 {
   "name": "codecord",
   "version": "0.0.1",
-  "description": "",
+  "description": "A tool-kit for easy discord bot creation, built over discord.js",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NeutrinoCC/codecord.git"
+    "url": "git+https://github.com/NeutrinoCC/codecord-utils.git"
   },
   "keywords": [
     "cc"
   ],
   "author": "Neutrino",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/NeutrinoCC/codecord/issues"
+    "url": "https://github.com/NeutrinoCC/codecord-utils/issues"
   },
-  "homepage": "https://github.com/NeutrinoCC/codecord#readme",
+  "homepage": "https://github.com/NeutrinoCC/codecord-utils#readme",
   "devDependencies": {
     "ts-node": "^10.9.2",
     "tsup": "^8.2.3"

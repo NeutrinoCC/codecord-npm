@@ -27,3 +27,7 @@ Cualquier problema por favor reporten abriendo un ticket de soporte en nuestro [
 - [Canvas](https://www.npmjs.com/package/canvas)
 - [Discord.js](https://www.npmjs.com/package/discord.js/v/13.0.0-dev.fdad14099779e61cb84dcd1cb2497e0e853a6144)
 - [color-thief-node](https://www.npmjs.com/package/color-thief-node)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
