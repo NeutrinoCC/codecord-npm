@@ -6,8 +6,10 @@ import { Portrait } from "./classes/portrait";
 import { CoordinateReference } from "./classes/portrait/types";
 import { Panel } from "./classes/panel";
 import { DateParser } from "./classes/date";
+import { Ini } from "./classes/ini";
 
 export {
+  Ini,
   Client,
   Collector,
   Book,
