@@ -13,13 +13,6 @@
   "keywords": [
     "cc"
   ],
-  "files": [
-    "LICENSE",
-    "README.md",
-    "dist",
-    "pnpm-lock.yaml",
-    "package.json"
-  ],
   "author": "Neutrino",
   "license": "MIT",
   "bugs": {
