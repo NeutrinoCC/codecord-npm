@@ -9,4 +9,5 @@ export enum APIError {
   collectorError = "collectorError",
   modalInputError = "modalInputError",
   noTextChannel = "noTextChannel",
+  notSnowflake = "notSnowflake",
 }

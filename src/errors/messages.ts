@@ -17,4 +17,5 @@ export const messages: ErrorMessages = {
     `An error ocurred while starting collector for ${customId}.`,
   modalInputError: `Not enough inputs to create modal.`,
   noTextChannel: (name: string) => `${name} no es un canal de texto.`,
+  notSnowflake: (id: string) => `${id} no es una id válida.`,
 };
