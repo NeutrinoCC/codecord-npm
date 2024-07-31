@@ -9,8 +9,11 @@ import { JsonManager } from "../jsonManager";
 import { JsonFilePanelData } from "./types";
 import { ApiError } from "../../errors";
 import { APIError } from "../../errors/types";
+import path from "path";
 
-const json = new JsonManager("./dist/classes/panel/data.json");
+const jsonFilePath = path.join(__dirname, "data.json");
+
+const json = new JsonManager(jsonFilePath);
 
 export class Panel {
   name;
