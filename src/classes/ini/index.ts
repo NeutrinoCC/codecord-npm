@@ -56,7 +56,7 @@ export class Ini {
 
     if (!match) return null;
 
-    const value = match[1].trim();
+    const value = match?.[1]?.trim() || null;
 
     if (value === "true" || value === "1") return true;
 

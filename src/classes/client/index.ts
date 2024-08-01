@@ -106,6 +106,9 @@ export default class Client {
 
   async registerCommands(token: string, guild?: Guild) {
     const base64Id = token.split(".")[0];
+
+    if (!base64Id) throw new Error("No base64 client id could be parsed.");
+
     const clientId = Buffer.from(base64Id, "base64").toString("ascii");
 
     const Rest: REST = new REST().setToken(token);

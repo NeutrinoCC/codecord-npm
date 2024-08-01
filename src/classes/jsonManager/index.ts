@@ -61,6 +61,8 @@ export class JsonManager {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
 
+      if (!key) return;
+
       if (i === keys.length - 1) {
         // Check if the property exists and is an array
 
@@ -95,6 +97,8 @@ export class JsonManager {
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
+
+      if (!key) return;
 
       // If we're at the last key, set the value
       if (i === keys.length - 1) {

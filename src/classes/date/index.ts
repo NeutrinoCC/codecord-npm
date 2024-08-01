@@ -83,26 +83,41 @@ export class DateParser {
 
     const match = dateString.match(new RegExp(`^${regex}$`));
 
-    if (!match) {
+    // Check if match is defined and is an array
+    if (!match || !Array.isArray(match)) return null;
+
+    // Check for required indices
+    if (match.length < 7 || !match[1]) return null;
+
+    let year = parseInt(match[1], 10);
+
+    // Check for month, day, hour, minute, second
+    let month = match[2] !== undefined ? parseInt(match[2], 10) : null;
+    let day = match[3] !== undefined ? parseInt(match[3], 10) : null;
+    let hour = match[4] !== undefined ? parseInt(match[4], 10) : null;
+    let minute = match[5] !== undefined ? parseInt(match[5], 10) : null;
+    let second = match[6] !== undefined ? parseInt(match[6], 10) : null;
+
+    // Further checks if month, day, hour, minute, and second are valid
+    if (
+      month === null ||
+      isNaN(month) ||
+      day === null ||
+      isNaN(day) ||
+      hour === null ||
+      isNaN(hour) ||
+      minute === null ||
+      isNaN(minute) ||
+      second === null ||
+      isNaN(second)
+    ) {
       return null;
     }
-
-    const year = parseInt(match[1], 10);
-
-    let month = parseInt(match[2], 10);
-
-    const day = parseInt(match[3], 10);
-
-    const hour = parseInt(match[4], 10);
-
-    const minute = parseInt(match[5], 10);
-
-    const second = parseInt(match[6], 10);
-
-    // Adjust month (JavaScript months are 0-based)
 
     month -= 1;
 
     return new Date(year, month, day, hour, minute, second);
+
+    // Adjust month (JavaScript months are 0-based)
   }
 }

@@ -4,7 +4,7 @@
   "description": "A tool-kit for easy discord bot creation, built over discord.js",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsup src/ --format cjs,esm --dts"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,8 @@
   "homepage": "https://github.com/NeutrinoCC/codecord-utils#readme",
   "devDependencies": {
     "ts-node": "^10.9.2",
-    "tsup": "^8.2.3"
+    "tsup": "^8.2.3",
+    "typescript": "^5.5.4"
   },
   "dependencies": {
     "canvas": "^2.11.2",

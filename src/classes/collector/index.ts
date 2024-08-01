@@ -179,6 +179,9 @@ export class Collector {
 
     submission.fields.components.forEach((row) => {
       const data = row.components[0];
+
+      if (!data) return;
+
       values.set(data.customId, data.value);
     });
 
