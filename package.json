@@ -1,10 +1,13 @@
 {
   "name": "codecord",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A tool-kit for easy discord bot creation, built over discord.js",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/ --format cjs,esm --dts"
+    "build": "tsup src/ --format cjs,esm --dts",
+    "lint": "tsc"
   },
   "repository": {
     "type": "git",
@@ -20,6 +23,7 @@
   },
   "homepage": "https://github.com/NeutrinoCC/codecord-utils#readme",
   "devDependencies": {
+    "@changesets/cli": "^2.27.7",
     "ts-node": "^10.9.2",
     "tsup": "^8.2.3",
     "typescript": "^5.5.4"
