@@ -1,13 +1,5 @@
-import { Command, APIinteraction, Event } from "./types";
-
-export function isCommand(command: any): command is Command {
-  return command;
-}
-
-export function isEvent(event: any): event is Event {
-  return event;
-}
-
-export function isInteraction(interaction: any): interaction is APIinteraction {
-  return interaction;
+export function containsUppercaseSymbolsOrSpaces(str: string) {
+  // Regular expression to check for uppercase letters, symbols, or spaces
+  const pattern = /[A-Z\s!@#$%^&*()_+={}\[\]:;"'<>?,./`~]/;
+  return pattern.test(str);
 }

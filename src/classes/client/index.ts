@@ -3,30 +3,41 @@ import { access, isDirectory } from "../../functions/files";
 import path from "path";
 import { clientConfig } from "./config";
 import {
+  Collection,
   Client as DJSClient,
+  Events,
   Guild,
   REST,
   Routes,
+  SlashCommandBuilder,
   SnowflakeUtil,
 } from "discord.js";
-import { isCommand, isEvent, isInteraction } from "./validator";
 import { ApiError } from "../../errors";
 import { APIError } from "../../errors/types";
+import { Command, Event, APIInteraction as Interaction } from "./responses";
+import { InteractionFunction } from "./types";
 
 export default class Client {
   app: DJSClient;
 
   constructor() {
-    this.app = new DJSClient(clientConfig);
+    const app = new DJSClient(clientConfig);
+
+    app.commands = new Collection<string, Command>();
+    app.interactions = new Collection<string, InteractionFunction>();
+
+    this.app = app;
   }
 
   readModule(modulePath: string) {
-    if (!isDirectory(modulePath)) return;
+    const absoluteModulePath = path.join(process.cwd(), modulePath);
 
-    const module = fs.readdirSync(modulePath);
+    if (!isDirectory(absoluteModulePath)) return;
+
+    const module = fs.readdirSync(absoluteModulePath);
 
     for (const folder of module) {
-      const folderPath = path.join(modulePath, folder);
+      const folderPath = path.join(absoluteModulePath, folder);
 
       if (!isDirectory(folderPath)) continue;
 
@@ -54,11 +65,18 @@ export default class Client {
     for (const filePath of files) {
       if (!access(filePath)) continue;
 
-      const command = require(filePath);
+      let command = require(filePath);
 
-      if (!isCommand(command)) continue;
+      if (command.default) command = command.default;
 
-      this.app.commands.set(command.data.name, command);
+      console.log(command);
+
+      if (command instanceof Command)
+        this.app.commands.set(command.name, command);
+      else
+        console.log(
+          `${filePath} command needs to use Command class to be readed.`
+        );
     }
   }
 
@@ -71,13 +89,12 @@ export default class Client {
     for (const filePath of files) {
       if (!access(filePath)) continue;
 
-      const interaction = require(filePath);
+      let interaction = require(filePath);
 
-      if (!isInteraction(interaction)) continue;
+      if (interaction?.default) interaction = interaction.default;
 
-      const interactionName = path.basename(filePath, ".js");
-
-      this.app.interactions.set(interactionName, interaction);
+      if (interaction instanceof Interaction)
+        this.app.interactions.set(interaction.name, interaction.execute);
     }
   }
 
@@ -90,18 +107,18 @@ export default class Client {
     for (const filePath of files) {
       if (!access(filePath)) continue;
 
-      const event = require(filePath);
+      let event = require(filePath);
 
-      if (!isEvent(event)) continue;
+      if (event?.default) event = event.default;
 
-      const eventName = path.basename(filePath, ".js");
-
-      this.app.interactions.set(eventName, event);
+      if (event instanceof Event && event.name in Events) {
+        this.app.on(String(event.name), event.execute);
+      }
     }
   }
 
   async login(token: string) {
-    this.app.login(token);
+    await this.app.login(token);
   }
 
   async registerCommands(token: string, guild?: Guild) {
@@ -112,7 +129,7 @@ export default class Client {
     const clientId = Buffer.from(base64Id, "base64").toString("ascii");
 
     const Rest: REST = new REST().setToken(token);
-    const parsedCommands = this.app.commands.map((cmd) => cmd.data.toJSON());
+    const parsedCommands = this.app.commands.map((command) => command.toJSON());
 
     let i = 1;
     setInterval(() => {

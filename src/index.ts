@@ -7,6 +7,11 @@ import { CoordinateReference } from "./classes/portrait/types";
 import { Panel } from "./classes/panel";
 import { DateParser } from "./classes/date";
 import { Ini } from "./classes/ini";
+import {
+  Command,
+  APIInteraction as Interaction,
+  Event,
+} from "./classes/client/responses";
 
 export {
   Ini,
@@ -18,4 +23,7 @@ export {
   Panel,
   DateParser,
   CoordinateReference,
+  Command,
+  Interaction,
+  Event,
 };
