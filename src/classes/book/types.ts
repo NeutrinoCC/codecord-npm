@@ -6,11 +6,14 @@ import {
   ModalSubmitInteraction,
 } from "discord.js";
 
-export type Render = () => Promise<MessagePayload | MessageEditOptions>;
+export type Render = () =>
+  | Promise<MessagePayload | MessageEditOptions>
+  | MessagePayload
+  | MessageEditOptions;
 
-export type Length = () => Promise<number>;
+export type Length = () => Promise<number> | number;
 
-export type PageLength = () => Promise<number>;
+export type PageLength = () => Promise<number> | number;
 
 export type BookInteraction =
   | ChatInputCommandInteraction

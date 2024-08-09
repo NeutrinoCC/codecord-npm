@@ -12,9 +12,27 @@ import {
   APIInteraction as Interaction,
   Event,
 } from "./classes/client/responses";
+import { Branding } from "./classes/branding";
+
+export default {
+  Ini,
+  Client,
+  Collector,
+  Book,
+  JsonManager,
+  Portrait,
+  Panel,
+  DateParser,
+  CoordinateReference,
+  Command,
+  Interaction,
+  Event,
+  Branding,
+};
 
 export {
   Ini,
+  Branding,
   Client,
   Collector,
   Book,

@@ -9,8 +9,9 @@ import {
   Guild,
   REST,
   Routes,
-  SlashCommandBuilder,
+  Interaction as DjsInteraction,
   SnowflakeUtil,
+  SlashCommandBuilder,
 } from "discord.js";
 import { ApiError } from "../../errors";
 import { APIError } from "../../errors/types";
@@ -69,8 +70,6 @@ export default class Client {
 
       if (command.default) command = command.default;
 
-      console.log(command);
-
       if (command instanceof Command)
         this.app.commands.set(command.name, command);
       else
@@ -117,6 +116,44 @@ export default class Client {
     }
   }
 
+  /**
+   * Interaction event, executes when user interacts
+   * @param {Interaction} interaction
+   * @void
+   */
+  private async interactionHandler(interaction: DjsInteraction) {
+    const { client: c } = interaction;
+
+    if (interaction.isChatInputCommand()) {
+      // Command interaction
+      const command = c.commands.get(interaction.commandName) as
+        | { execute: (interaction: any) => void }
+        | undefined;
+
+      if (!command) return;
+
+      if (command.execute) {
+        command.execute(interaction);
+
+        console.log(
+          `[command] ${interaction.user.username} used /${interaction.commandName}`
+        );
+      } else {
+        console.error("Command does not have an execute method");
+      }
+    } else if (interaction.isMessageComponent()) {
+      const execute = c.interactions.get(interaction.customId);
+
+      if (!execute) return;
+
+      execute(interaction);
+
+      console.log(
+        `[interaction] ${interaction.user.username} used >${interaction.customId}`
+      );
+    }
+  }
+
   async login(token: string) {
     await this.app.login(token);
   }
@@ -129,7 +166,13 @@ export default class Client {
     const clientId = Buffer.from(base64Id, "base64").toString("ascii");
 
     const Rest: REST = new REST().setToken(token);
-    const parsedCommands = this.app.commands.map((command) => command.toJSON());
+    const parsedCommands = this.app.commands.map((command) => {
+      const newObj: any = Object.assign({}, command.toJSON());
+
+      delete newObj["execute"];
+
+      return newObj;
+    });
 
     let i = 1;
     setInterval(() => {
@@ -149,6 +192,9 @@ export default class Client {
         i > 1 ? "s" : ""
       }.`
     );
+
+    // set an interaction handler to start listening commands
+    this.app.on(Events.InteractionCreate, this.interactionHandler);
   }
 
   async fetchGuild(guildId: string) {

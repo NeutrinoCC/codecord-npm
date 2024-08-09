@@ -12,17 +12,18 @@ export class Branding {
   }
 
   async getColor() {
-    const icon = this.guild.iconURL();
+    const icon = this.guild.iconURL({ extension: "png" });
 
-    if (!icon)
+    if (!icon) {
+      const blurple = "#5865F2";
+
       return {
-        pattern: Number(`0x${"#5865F2".slice(1)}`),
-        hex: "#5865F2",
+        pattern: Number(`0x${blurple.slice(1)}`),
+        hex: blurple,
       };
+    }
 
-    const rgbArr: [number, number, number] = await getColorFromURL(
-      this.guild.iconURL() || "localhost"
-    );
+    const rgbArr: [number, number, number] = await getColorFromURL(icon);
 
     const hex = rgbArr.reduce((acc, val) => {
       const hexVal = val.toString(16).padStart(2, "0");
@@ -54,10 +55,10 @@ export class Branding {
   async generatePortrait() {
     const color = await this.getColor();
 
-    const portrait = new Portrait(1200, 600);
+    const portrait = new Portrait(1200, 300);
 
     // draw background
-    const banner = this.guild.bannerURL();
+    const banner = this.guild.bannerURL({ extension: "png" });
 
     if (banner) {
       await portrait.drawImage({
@@ -71,7 +72,7 @@ export class Branding {
       });
     }
 
-    const icon = this.guild.iconURL();
+    const icon = this.guild.iconURL({ extension: "png" });
 
     if (icon) {
       await portrait.drawImage({
@@ -79,7 +80,7 @@ export class Branding {
         borderWidth: 5,
         borderColor: color.hex || "#FFFFFF",
         x: CoordinateReference["1/2"],
-        y: CoordinateReference["1/2"],
+        y: CoordinateReference["1/3"],
         size: 1,
         centered: true,
         shadow: 15,
@@ -90,11 +91,12 @@ export class Branding {
     await portrait.writeText({
       text: this.guild.name,
       font: "sans-serif",
-      x: CoordinateReference["2/3"],
-      y: CoordinateReference["2/3"],
+      x: CoordinateReference["1/2"],
+      y: (portrait.canvas.height * 5) / 6,
       size: 80,
       centered: true,
       shadow: 15,
+      color: "#FFFFFF",
     });
 
     return portrait.createAttachment("guild-banner.png");

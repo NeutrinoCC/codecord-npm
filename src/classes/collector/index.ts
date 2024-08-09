@@ -108,6 +108,7 @@ export class Collector {
     const collector = this.interaction.channel.createMessageCollector({
       time: timeoutMiliseconds || 15 * 60 * 60 * 1000,
       filter,
+      maxProcessed: 1,
     });
 
     collector.on("collect", listener);

@@ -1,3 +1,9 @@
+import {
+  ChatInputCommandInteraction,
+  Interaction,
+  MessageComponentInteraction,
+} from "discord.js";
+import { A } from "../../../dist/responses-I7Sg7xFZ.mjs";
 import { Collector } from "../collector";
 import {
   BookConstructor,
@@ -12,27 +18,26 @@ export class Book {
   render: Render;
   length: Length;
   pageLength?: PageLength;
+
   // numbers
   page: number;
   paragraph: number;
-
   interaction: BookInteraction;
   collector: Collector;
 
   constructor({ render, length, pageLength, interaction }: BookConstructor) {
     this.render = render;
     this.length = length;
+    this.pageLength = pageLength;
     this.page = 1;
     this.paragraph = 1;
     this.interaction = interaction;
     this.collector = new Collector(interaction);
-
-    if (pageLength) this.pageLength = pageLength;
   }
 
   // when new pages or elements vary on stage
   async fix() {
-    const pages = await this.length();
+    const pages = (await this.length?.()) || 0;
 
     if (pages <= 0) this.page = 1;
     else if (this.page > pages) this.page = pages;
@@ -46,7 +51,7 @@ export class Book {
   }
 
   async write() {
-    const render = await this.render();
+    const render = (await this.render?.()) || {};
 
     if (this.interaction && this.interaction.replied)
       await this.interaction.editReply(render);
@@ -55,7 +60,7 @@ export class Book {
   async next() {
     this.page++;
 
-    const pages = await this.length();
+    const pages = (await this.length?.()) || 0;
 
     if (this.page > pages) this.page = 1;
 
@@ -67,7 +72,7 @@ export class Book {
   async previous() {
     this.page--;
 
-    const pages = await this.length();
+    const pages = (await this.length?.()) || 0;
 
     if (this.page <= 0) this.page = pages;
 
@@ -80,11 +85,29 @@ export class Book {
   async slide(n: number) {
     this.paragraph += n;
 
-    const paragraphs = await this.length();
+    const paragraphs = (await this.length?.()) || 0;
 
     if (this.paragraph <= 0) this.paragraph = paragraphs;
     else if (this.paragraph > paragraphs) this.paragraph = 1;
 
     await this.write();
+  }
+
+  setRender(render: Render) {
+    this.render = render;
+
+    return this;
+  }
+
+  setLength(length: Length) {
+    this.length = length;
+
+    return this;
+  }
+
+  setPageLength(pageLength: PageLength) {
+    this.pageLength = pageLength;
+
+    return this;
   }
 }

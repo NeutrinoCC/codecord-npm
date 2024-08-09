@@ -1,18 +1,27 @@
 import { access } from "../../functions/files";
 import fsPromises from "fs/promises";
 import fs from "fs";
+import path from "path";
+
+const jsonDirPath = "./json";
 
 export class JsonManager {
   filePath: string;
+  name: string;
 
-  constructor(filePath: string) {
-    this.filePath = filePath;
+  constructor(name: string) {
+    this.name = name;
+    this.filePath = path.join(jsonDirPath, `${name}.json`);
 
-    this._writeJsonFile({});
+    if (!access(this.filePath)) this._writeJsonFile({});
+  }
+
+  private _createJsonDir() {
+    fs.mkdirSync(jsonDirPath);
   }
 
   private _writeJsonFile(data: any) {
-    //if (!access(this.filePath)) throw new Error();
+    if (!access(jsonDirPath)) this._createJsonDir();
 
     if (!data) return;
 
