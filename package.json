@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/NeutrinoCC/codecord-utils#readme",
   "devDependencies": {
-    "@changesets/cli": "^2.27.7",
     "ts-node": "^10.9.2",
     "tsup": "^8.2.3",
     "typescript": "^5.5.4"
