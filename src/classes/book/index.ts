@@ -1,9 +1,3 @@
-import {
-  ChatInputCommandInteraction,
-  Interaction,
-  MessageComponentInteraction,
-} from "discord.js";
-import { A } from "../../../dist/responses-I7Sg7xFZ.mjs";
 import { Collector } from "../collector";
 import {
   BookConstructor,
