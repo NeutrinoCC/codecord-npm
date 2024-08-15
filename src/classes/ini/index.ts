@@ -37,17 +37,7 @@ export class Ini {
 
    */
 
-  /**
-
- * Retrieves the value of a specific key from the config.ini file and parses it to the correct type.
-
- * @param query The key to retrieve the value for.
-
- * @returns The parsed value associated with the key, or null if not found.
-
- */
-
-  static get(query: string): string | number | boolean | null {
+  static get(query: string): string | null {
     const fileContent = readIniFile();
 
     const regex = new RegExp(`^${query}=([^\\s]+)`, "m");
@@ -57,6 +47,12 @@ export class Ini {
     if (!match) return null;
 
     const value = match?.[1]?.trim() || null;
+
+    return value;
+  }
+
+  static parseGet(query: string): any {
+    const value = this.get(query);
 
     if (value === "true" || value === "1") return true;
 

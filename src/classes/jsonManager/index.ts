@@ -12,8 +12,6 @@ export class JsonManager {
   constructor(name: string) {
     this.name = name;
     this.filePath = path.join(jsonDirPath, `${name}.json`);
-
-    if (!access(this.filePath)) this._writeJsonFile({});
   }
 
   private _createJsonDir() {
@@ -29,7 +27,7 @@ export class JsonManager {
   }
 
   private async _readJsonFile() {
-    if (!access(this.filePath)) throw new Error();
+    if (!access(this.filePath)) this._writeJsonFile({});
 
     const fileData = await fsPromises.readFile(this.filePath, "utf8");
     const content: any = JSON.parse(fileData);
@@ -154,6 +152,8 @@ export class JsonManager {
   }
 
   has(query: string) {
+    if (!access(this.filePath)) this._writeJsonFile({});
+
     const jsonData = fs.readFileSync(this.filePath, "utf8");
     const data: { [key: string]: any } = JSON.parse(jsonData);
 
