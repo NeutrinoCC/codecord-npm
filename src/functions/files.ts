@@ -1,6 +1,5 @@
 import fs from "fs";
-import { ApiError } from "../errors";
-import { APIError } from "../errors/types";
+import ApiError from "../errors/index";
 
 export function access(path: string) {
   try {
@@ -10,13 +9,13 @@ export function access(path: string) {
     if (error instanceof Error) {
       switch (error.name) {
         case "ENOENT":
-          new ApiError(APIError.fileNotFound, error, path);
+          ApiError.log("fileNotFound", path);
           break;
         case "EACCES":
-          new ApiError(APIError.permissionDenied, error, path);
+          ApiError.log("accessDenied", path);
           break;
         default:
-          new ApiError(APIError.accessError, error, path);
+          ApiError.log("accessError", path);
           break;
       }
     }

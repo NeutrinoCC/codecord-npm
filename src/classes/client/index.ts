@@ -13,8 +13,7 @@ import {
   SnowflakeUtil,
   SlashCommandBuilder,
 } from "discord.js";
-import { ApiError } from "../../errors";
-import { APIError } from "../../errors/types";
+import ApiError from "../../errors/index";
 import { Command, Event, APIInteraction as Interaction } from "./responses";
 import { InteractionFunction } from "./types";
 
@@ -207,8 +206,7 @@ export default class Client {
 
       return guild;
     } catch (error) {
-      if (error instanceof Error)
-        new ApiError(APIError.notSnowflake, error, guildId).throw();
+      if (error instanceof Error) ApiError.throw("notSnowflake", guildId);
     }
   }
 }

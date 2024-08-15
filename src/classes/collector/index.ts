@@ -8,8 +8,7 @@ import {
   TextInputBuilder,
 } from "discord.js";
 import { InteractionListenersObject, InteractionListener } from "./types";
-import { ApiError } from "../../errors";
-import { APIError } from "../../errors/types";
+import ApiError from "../../errors/index";
 
 export class Collector {
   interaction: ChatInputCommandInteraction | MessageComponentInteraction;
@@ -24,8 +23,7 @@ export class Collector {
     listeners: InteractionListenersObject,
     timeoutMiliseconds?: number
   ) {
-    if (!this.interaction.channel)
-      return new ApiError(APIError.collectorError).throw();
+    if (!this.interaction.channel) ApiError.throw("collectorError");
 
     let reply = await this.interaction.fetchReply().catch(() => null);
 
@@ -38,14 +36,7 @@ export class Collector {
         })
         .catch(() => null);
 
-    if (!reply)
-      return new ApiError(
-        APIError.collectorError,
-        undefined,
-        this.interaction.isCommand()
-          ? this.interaction.commandName
-          : this.interaction.customId
-      ).throw();
+    if (!reply) return ApiError.throw("collectorError");
 
     const filter = (i: MessageComponentInteraction) =>
       reply.id === i.message.id && this.interaction.user.id === i.user.id;
@@ -79,8 +70,7 @@ export class Collector {
     listener: (message: Message) => Promise<any>,
     timeoutMiliseconds?: number
   ) {
-    if (!this.interaction.channel)
-      return new ApiError(APIError.collectorError).throw();
+    if (!this.interaction.channel) ApiError.throw("collectorError");
 
     let reply = await this.interaction.fetchReply().catch(() => null);
 
@@ -93,14 +83,7 @@ export class Collector {
         })
         .catch(() => null);
 
-    if (!reply)
-      return new ApiError(
-        APIError.collectorError,
-        undefined,
-        this.interaction.isCommand()
-          ? this.interaction.commandName
-          : this.interaction.customId
-      ).throw();
+    if (!reply) ApiError.throw("collectorError");
 
     const filter = (message: Message) =>
       this.interaction.user.id === message.author.id;
@@ -137,7 +120,7 @@ export class Collector {
       custom_id,
     });
 
-    if (inputs.length < 1) return new ApiError(APIError.modalInputError);
+    if (inputs.length < 1) ApiError.throw("modalInputError");
 
     for (const input of inputs) {
       const row = new ActionRowBuilder<TextInputBuilder>().addComponents(input);

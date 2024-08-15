@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import { JsonManager } from "../jsonManager";
 import { JsonFilePanelData } from "./types";
-import { APIError } from "../../errors/types";
+import ApiError from "../../errors";
 
 const json = new JsonManager("panels");
 
@@ -48,8 +48,7 @@ export class Panel {
   async build(message: Message) {
     const { channel } = message;
 
-    if (channel.type !== ChannelType.GuildText)
-      throw new Error(APIError.noTextChannel);
+    if (channel.type !== ChannelType.GuildText) ApiError.throw("noTextChannel");
 
     await json.set(this.name, {
       messageId: message.id,

@@ -1,5 +1,3 @@
-import { access } from "../../functions/files";
-
 import fs from "fs";
 
 const filePath = `./config.ini`;
