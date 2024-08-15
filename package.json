@@ -1,6 +1,6 @@
 {
   "name": "codecord",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A tool-kit for easy discord bot creation, built over discord.js",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
