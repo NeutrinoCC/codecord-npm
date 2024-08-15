@@ -10,13 +10,13 @@ export function access(path: string) {
     if (error instanceof Error) {
       switch (error.name) {
         case "ENOENT":
-          new ApiError(APIError.fileNotFound, error, path).log();
+          new ApiError(APIError.fileNotFound, error, path);
           break;
         case "EACCES":
-          new ApiError(APIError.permissionDenied, error, path).log();
+          new ApiError(APIError.permissionDenied, error, path);
           break;
         default:
-          new ApiError(APIError.accessError, error, path).log();
+          new ApiError(APIError.accessError, error, path);
           break;
       }
     }
