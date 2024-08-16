@@ -109,9 +109,12 @@ export default class Client {
 
       if (event?.default) event = event.default;
 
-      if (event instanceof Event && event.name in Events) {
+      if (
+        event instanceof Event &&
+        Object.values(Events).includes(event.name)
+      ) {
         this.app.on(String(event.name), event.execute);
-      }
+      } else console.log(`[ err ] ${event.name} is not a valid event.`);
     }
   }
 
