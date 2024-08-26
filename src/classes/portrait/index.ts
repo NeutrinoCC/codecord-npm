@@ -21,6 +21,38 @@ export class Portrait {
     this.ctx = ctx;
   }
 
+  roundRect(
+    x: number,
+
+    y: number,
+
+    width: number,
+
+    height: number,
+
+    radius: number
+  ) {
+    this.ctx.beginPath();
+
+    this.ctx.moveTo(x + radius, y);
+
+    this.ctx.arcTo(x + width, y, x + width, y + radius, radius);
+
+    this.ctx.arcTo(
+      x + width,
+      y + height,
+      x + width - radius,
+      y + height,
+      radius
+    );
+
+    this.ctx.arcTo(x, y + height, x, y + height - radius, radius);
+
+    this.ctx.arcTo(x, y, x + radius, y, radius);
+
+    this.ctx.closePath();
+  }
+
   async toBuffer() {
     return this.canvas.toBuffer();
   }
@@ -97,8 +129,6 @@ export class Portrait {
 
       this.ctx.drawImage(image, coord_x, coord_y, imageWidth, imageHeight);
     } else {
-      this.ctx.save();
-
       // Draw the shadow
       if (shadow) {
         this.ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
@@ -110,26 +140,47 @@ export class Portrait {
       // Draw the border
 
       if (borderWidth) {
-        this.ctx.strokeStyle = borderColor;
+        this.ctx.save();
 
-        this.ctx.lineWidth = borderWidth;
+        const curveRadius = Math.min(imageWidth, imageHeight) * (frame / 100);
+
+        this.roundRect(coord_x, coord_y, imageWidth, imageHeight, curveRadius);
+
+        this.ctx.clip();
+
+        this.ctx.fillStyle = borderColor;
 
         this.ctx.stroke();
 
-        this.ctx.shadowColor = "transparent";
+        this.ctx.fillRect(coord_x, coord_y, imageWidth, imageHeight);
+
+        this.ctx.restore();
+
+        imageWidth -= borderWidth * 2;
+        imageHeight -= borderWidth * 2;
+        coord_x += borderWidth;
+        coord_y += borderWidth;
       }
 
       // Create a rounded rectangle
 
+      this.ctx.save();
+
       this.ctx.beginPath();
 
-      this.ctx.arc(
+      // Curve radius as a percentage of the image size
+
+      const curveRadius = Math.min(imageWidth, imageHeight) * (frame / 100);
+
+      this.roundRect(coord_x, coord_y, imageWidth, imageHeight, curveRadius);
+
+      /*this.ctx.arc(
         coord_x + imageWidth / 2,
         coord_y + imageHeight / 2,
         Math.min(imageWidth, imageHeight) / 2,
         0,
-        2 * Math.PI
-      );
+        Math.PI * 2
+      );*/
 
       this.ctx.clip();
 
@@ -174,7 +225,7 @@ export class Portrait {
 
     coord_y =
       typeof y !== "number"
-        ? calculateCoordinateReference(y, this.canvas.width)
+        ? calculateCoordinateReference(y, this.canvas.height)
         : y;
 
     if (centered) {
@@ -182,7 +233,7 @@ export class Portrait {
 
       coord_x -= textWidth / 2;
 
-      coord_y -= size / 2;
+      coord_y += size / 2;
     }
 
     if (shadow) {
@@ -219,7 +270,7 @@ export class Portrait {
 
     coord_y =
       typeof y !== "number"
-        ? calculateCoordinateReference(y, this.canvas.width)
+        ? calculateCoordinateReference(y, this.canvas.height)
         : y;
 
     let coord_w: number;
@@ -233,7 +284,7 @@ export class Portrait {
 
     coord_h =
       typeof h !== "number"
-        ? calculateCoordinateReference(h, this.canvas.width)
+        ? calculateCoordinateReference(h, this.canvas.height)
         : h;
 
     // Draw the shadow
@@ -295,7 +346,7 @@ export class Portrait {
 
     coord_y =
       typeof y !== "number"
-        ? calculateCoordinateReference(y, this.canvas.width)
+        ? calculateCoordinateReference(y, this.canvas.height)
         : y;
 
     let coord_w: number;
@@ -309,7 +360,7 @@ export class Portrait {
 
     coord_h =
       typeof h !== "number"
-        ? calculateCoordinateReference(h, this.canvas.width)
+        ? calculateCoordinateReference(h, this.canvas.height)
         : h;
 
     // Fill the rectangle

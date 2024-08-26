@@ -2,23 +2,42 @@ import fs from "fs";
 import { access, isDirectory } from "../../functions/files";
 import path from "path";
 import { clientConfig } from "./config";
-import { Client as DJSClient } from "discord.js";
-import { isCommand, isEvent, isInteraction } from "./validator";
+import {
+  Collection,
+  Client as DJSClient,
+  Events,
+  Guild,
+  REST,
+  Routes,
+  Interaction as DjsInteraction,
+  SnowflakeUtil,
+  SlashCommandBuilder,
+} from "discord.js";
+import ApiError from "../../errors/index";
+import { Command, Event, APIInteraction as Interaction } from "./responses";
+import { InteractionFunction } from "./types";
 
 export default class Client {
   app: DJSClient;
 
   constructor() {
-    this.app = new DJSClient(clientConfig);
+    const app = new DJSClient(clientConfig);
+
+    app.commands = new Collection<string, Command>();
+    app.interactions = new Collection<string, InteractionFunction>();
+
+    this.app = app;
   }
 
   readModule(modulePath: string) {
-    if (!isDirectory(modulePath)) return;
+    const absoluteModulePath = path.join(process.cwd(), modulePath);
 
-    const module = fs.readdirSync(modulePath);
+    if (!isDirectory(absoluteModulePath)) return;
+
+    const module = fs.readdirSync(absoluteModulePath);
 
     for (const folder of module) {
-      const folderPath = path.join(modulePath, folder);
+      const folderPath = path.join(absoluteModulePath, folder);
 
       if (!isDirectory(folderPath)) continue;
 
@@ -38,61 +57,165 @@ export default class Client {
   }
 
   readCommands(folderPath: string) {
+    const absoluteFolderPath = path.join(process.cwd(), folderPath);
+
     const files = fs
-      .readdirSync(folderPath)
+      .readdirSync(absoluteFolderPath)
       .filter((file) => file.endsWith(".js"))
-      .map((fileName) => path.join(folderPath, fileName));
+      .map((fileName) => path.join(absoluteFolderPath, fileName));
 
     for (const filePath of files) {
       if (!access(filePath)) continue;
 
-      const command = require(filePath);
+      let command = require(filePath);
 
-      if (!isCommand(command)) continue;
+      if (command.default) command = command.default;
 
-      this.app.commands.set(command.data.name, command);
+      if (command instanceof Command)
+        this.app.commands.set(command.name, command);
+      else
+        console.log(
+          `${filePath} command needs to use Command class to be readed.`
+        );
     }
+
+    return this;
   }
 
   readInteractions(folderPath: string) {
+    const absoluteFolderPath = path.join(process.cwd(), folderPath);
+
     const files = fs
-      .readdirSync(folderPath)
+      .readdirSync(absoluteFolderPath)
       .filter((file) => file.endsWith(".js"))
-      .map((fileName) => path.join(folderPath, fileName));
+      .map((fileName) => path.join(absoluteFolderPath, fileName));
 
     for (const filePath of files) {
       if (!access(filePath)) continue;
 
-      const interaction = require(filePath);
+      let interaction = require(filePath);
 
-      if (!isInteraction(interaction)) continue;
+      if (interaction?.default) interaction = interaction.default;
 
-      const interactionName = path.basename(filePath, ".js");
-
-      this.app.interactions.set(interactionName, interaction);
+      if (interaction instanceof Interaction)
+        this.app.interactions.set(interaction.name, interaction.execute);
     }
+
+    return this;
   }
 
   readEvents(folderPath: string) {
+    const absoluteFolderPath = path.join(process.cwd(), folderPath);
+
     const files = fs
-      .readdirSync(folderPath)
+      .readdirSync(absoluteFolderPath)
       .filter((file) => file.endsWith(".js"))
-      .map((fileName) => path.join(folderPath, fileName));
+      .map((fileName) => path.join(absoluteFolderPath, fileName));
 
     for (const filePath of files) {
       if (!access(filePath)) continue;
 
-      const event = require(filePath);
+      let event = require(filePath);
 
-      if (!isEvent(event)) continue;
+      if (event?.default) event = event.default;
 
-      const eventName = path.basename(filePath, ".js");
+      if (
+        event instanceof Event &&
+        Object.values(Events).includes(event.name)
+      ) {
+        this.app.on(String(event.name), event.execute);
+      } else console.log(`[ err ] ${event.name} is not a valid event.`);
+    }
 
-      this.app.interactions.set(eventName, event);
+    return this;
+  }
+
+  /**
+   * Interaction event, executes when user interacts
+   * @param {Interaction} interaction
+   * @void
+   */
+  private async interactionHandler(interaction: DjsInteraction) {
+    const { client: c } = interaction;
+
+    if (interaction.isChatInputCommand()) {
+      // Command interaction
+      const command = c.commands.get(interaction.commandName) as
+        | { execute: (interaction: any) => void }
+        | undefined;
+
+      if (!command) return;
+
+      if (command.execute) {
+        command.execute(interaction);
+
+        console.log(
+          `[command] ${interaction.user.username} used /${interaction.commandName}`
+        );
+      } else {
+        console.error("Command does not have an execute method");
+      }
+    } else if (interaction.isMessageComponent()) {
+      const execute = c.interactions.get(interaction.customId);
+
+      if (!execute) return;
+
+      execute(interaction);
+
+      console.log(
+        `[interaction] ${interaction.user.username} used >${interaction.customId}`
+      );
     }
   }
 
   async login(token: string) {
-    this.app.login(token);
+    await this.app.login(token);
+  }
+
+  async registerCommands(token: string, guildId?: string) {
+    const base64Id = token.split(".")[0];
+
+    if (!base64Id) throw new Error("No base64 client id could be parsed.");
+
+    const clientId = Buffer.from(base64Id, "base64").toString("ascii");
+
+    const Rest: REST = new REST().setToken(token);
+    const parsedCommands = this.app.commands.map((command) => {
+      const newObj: any = Object.assign({}, command.toJSON());
+
+      delete newObj["execute"];
+
+      return newObj;
+    });
+
+    let i = 1;
+    setInterval(() => {
+      i++;
+    }, 1000);
+
+    // Registering the parsed commands
+    const routes = guildId
+      ? Routes.applicationGuildCommands(clientId, guildId)
+      : Routes.applicationCommands(clientId);
+    await Rest.put(routes, {
+      body: parsedCommands,
+    });
+
+    // set an interaction handler to start listening commands
+    this.app.on(Events.InteractionCreate, this.interactionHandler);
+  }
+
+  async fetchGuild(guildId: string) {
+    try {
+      SnowflakeUtil.decode(guildId);
+
+      const guild = await this.app.guilds.fetch(guildId).catch(() => null);
+
+      if (!guild) return;
+
+      return guild;
+    } catch (error) {
+      if (error instanceof Error) ApiError.throw("notSnowflake", guildId);
+    }
   }
 }

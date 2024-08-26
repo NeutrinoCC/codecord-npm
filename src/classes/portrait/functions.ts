@@ -6,5 +6,7 @@ export function calculateCoordinateReference(
 ) {
   const [a, b] = reference.split("/").map(Number);
 
+  if (!a || !b) return 0;
+
   return (segment * a) / b;
 }

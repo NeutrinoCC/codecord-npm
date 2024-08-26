@@ -1,18 +1,25 @@
 import { access } from "../../functions/files";
 import fsPromises from "fs/promises";
 import fs from "fs";
+import path from "path";
+
+const jsonDirPath = "./json";
 
 export class JsonManager {
   filePath: string;
+  name: string;
 
-  constructor(filePath: string) {
-    this.filePath = filePath;
+  constructor(name: string) {
+    this.name = name;
+    this.filePath = path.join(jsonDirPath, `${name}.json`);
+  }
 
-    this._writeJsonFile({});
+  private _createJsonDir() {
+    fs.mkdirSync(jsonDirPath);
   }
 
   private _writeJsonFile(data: any) {
-    //if (!access(this.filePath)) throw new Error();
+    if (!access(jsonDirPath)) this._createJsonDir();
 
     if (!data) return;
 
@@ -20,7 +27,7 @@ export class JsonManager {
   }
 
   private async _readJsonFile() {
-    if (!access(this.filePath)) throw new Error();
+    if (!access(this.filePath)) this._writeJsonFile({});
 
     const fileData = await fsPromises.readFile(this.filePath, "utf8");
     const content: any = JSON.parse(fileData);
@@ -61,6 +68,8 @@ export class JsonManager {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
 
+      if (!key) return;
+
       if (i === keys.length - 1) {
         // Check if the property exists and is an array
 
@@ -95,6 +104,8 @@ export class JsonManager {
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
+
+      if (!key) return;
 
       // If we're at the last key, set the value
       if (i === keys.length - 1) {
@@ -141,6 +152,8 @@ export class JsonManager {
   }
 
   has(query: string) {
+    if (!access(this.filePath)) this._writeJsonFile({});
+
     const jsonData = fs.readFileSync(this.filePath, "utf8");
     const data: { [key: string]: any } = JSON.parse(jsonData);
 

@@ -1,4 +1,4 @@
-import { Partials } from "discord.js";
+import { Collection, Partials } from "discord.js";
 
 export const clientConfig = {
   intents: 3276799,

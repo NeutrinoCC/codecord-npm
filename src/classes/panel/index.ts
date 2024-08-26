@@ -7,10 +7,9 @@ import {
 } from "discord.js";
 import { JsonManager } from "../jsonManager";
 import { JsonFilePanelData } from "./types";
-import { ApiError } from "../../errors";
-import { APIError } from "../../errors/types";
+import ApiError from "../../errors";
 
-const json = new JsonManager("./dist/classes/panel/data.json");
+const json = new JsonManager("panels");
 
 export class Panel {
   name;
@@ -28,8 +27,10 @@ export class Panel {
 
     const channel = await channels.fetch(channelId).catch(() => null);
 
-    if (!channel || channel.type !== ChannelType.GuildText)
-      return await json.delete(this.name);
+    if (!channel || channel.type !== ChannelType.GuildText) {
+      await json.delete(this.name);
+      return;
+    }
 
     let message = await channel.messages.fetch(messageId).catch(() => null);
 
@@ -47,20 +48,13 @@ export class Panel {
   async build(message: Message) {
     const { channel } = message;
 
-    if (channel.type !== ChannelType.GuildText)
-      return new ApiError(
-        APIError.noTextChannel,
-        undefined,
-        channel.id
-      ).throw();
+    if (channel.type !== ChannelType.GuildText) ApiError.throw("noTextChannel");
 
     await json.set(this.name, {
       messageId: message.id,
       channelId: message.channel.id,
     });
+
+    return message;
   }
 }
-
-(async () => {
-  const panel = new Panel("boosters");
-})();
