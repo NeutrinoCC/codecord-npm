@@ -129,8 +129,6 @@ export class Portrait {
 
       this.ctx.drawImage(image, coord_x, coord_y, imageWidth, imageHeight);
     } else {
-      this.ctx.save();
-
       // Draw the shadow
       if (shadow) {
         this.ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
@@ -142,16 +140,31 @@ export class Portrait {
       // Draw the border
 
       if (borderWidth) {
-        this.ctx.strokeStyle = borderColor;
+        this.ctx.save();
 
-        this.ctx.lineWidth = borderWidth;
+        const curveRadius = Math.min(imageWidth, imageHeight) * (frame / 100);
+
+        this.roundRect(coord_x, coord_y, imageWidth, imageHeight, curveRadius);
+
+        this.ctx.clip();
+
+        this.ctx.fillStyle = borderColor;
 
         this.ctx.stroke();
 
-        this.ctx.shadowColor = "transparent";
+        this.ctx.fillRect(coord_x, coord_y, imageWidth, imageHeight);
+
+        this.ctx.restore();
+
+        imageWidth -= borderWidth * 2;
+        imageHeight -= borderWidth * 2;
+        coord_x += borderWidth;
+        coord_y += borderWidth;
       }
 
       // Create a rounded rectangle
+
+      this.ctx.save();
 
       this.ctx.beginPath();
 
@@ -220,10 +233,8 @@ export class Portrait {
 
       coord_x -= textWidth / 2;
 
-      coord_y -= size / 2;
+      coord_y += size / 2;
     }
-
-    console.log(coord_x, coord_y);
 
     if (shadow) {
       // rellenar contorno de la imagen

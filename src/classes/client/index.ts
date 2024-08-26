@@ -57,10 +57,12 @@ export default class Client {
   }
 
   readCommands(folderPath: string) {
+    const absoluteFolderPath = path.join(process.cwd(), folderPath);
+
     const files = fs
-      .readdirSync(folderPath)
+      .readdirSync(absoluteFolderPath)
       .filter((file) => file.endsWith(".js"))
-      .map((fileName) => path.join(folderPath, fileName));
+      .map((fileName) => path.join(absoluteFolderPath, fileName));
 
     for (const filePath of files) {
       if (!access(filePath)) continue;
@@ -76,13 +78,17 @@ export default class Client {
           `${filePath} command needs to use Command class to be readed.`
         );
     }
+
+    return this;
   }
 
   readInteractions(folderPath: string) {
+    const absoluteFolderPath = path.join(process.cwd(), folderPath);
+
     const files = fs
-      .readdirSync(folderPath)
+      .readdirSync(absoluteFolderPath)
       .filter((file) => file.endsWith(".js"))
-      .map((fileName) => path.join(folderPath, fileName));
+      .map((fileName) => path.join(absoluteFolderPath, fileName));
 
     for (const filePath of files) {
       if (!access(filePath)) continue;
@@ -94,13 +100,17 @@ export default class Client {
       if (interaction instanceof Interaction)
         this.app.interactions.set(interaction.name, interaction.execute);
     }
+
+    return this;
   }
 
   readEvents(folderPath: string) {
+    const absoluteFolderPath = path.join(process.cwd(), folderPath);
+
     const files = fs
-      .readdirSync(folderPath)
+      .readdirSync(absoluteFolderPath)
       .filter((file) => file.endsWith(".js"))
-      .map((fileName) => path.join(folderPath, fileName));
+      .map((fileName) => path.join(absoluteFolderPath, fileName));
 
     for (const filePath of files) {
       if (!access(filePath)) continue;
@@ -116,6 +126,8 @@ export default class Client {
         this.app.on(String(event.name), event.execute);
       } else console.log(`[ err ] ${event.name} is not a valid event.`);
     }
+
+    return this;
   }
 
   /**
@@ -160,7 +172,7 @@ export default class Client {
     await this.app.login(token);
   }
 
-  async registerCommands(token: string, guild?: Guild) {
+  async registerCommands(token: string, guildId?: string) {
     const base64Id = token.split(".")[0];
 
     if (!base64Id) throw new Error("No base64 client id could be parsed.");
@@ -182,18 +194,12 @@ export default class Client {
     }, 1000);
 
     // Registering the parsed commands
-    const routes = guild
-      ? Routes.applicationGuildCommands(clientId, guild.id)
+    const routes = guildId
+      ? Routes.applicationGuildCommands(clientId, guildId)
       : Routes.applicationCommands(clientId);
     await Rest.put(routes, {
       body: parsedCommands,
     });
-
-    console.log(
-      `[Client] Registered ${parsedCommands.length} {/} in ${i} second${
-        i > 1 ? "s" : ""
-      }.`
-    );
 
     // set an interaction handler to start listening commands
     this.app.on(Events.InteractionCreate, this.interactionHandler);
