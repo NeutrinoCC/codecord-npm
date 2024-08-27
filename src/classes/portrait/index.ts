@@ -7,7 +7,7 @@ import {
   LineOptions,
   FillOptions,
 } from "./types";
-import { createCanvas, loadImage } from "canvas";
+import { createCanvas, loadImage } from "@napi-rs/canvas";
 
 export class Portrait {
   canvas;
@@ -54,11 +54,11 @@ export class Portrait {
   }
 
   async toBuffer() {
-    return this.canvas.toBuffer();
+    return this.canvas.toBuffer("image/png");
   }
 
   async createAttachment(name: string) {
-    const buffer = this.canvas.toBuffer();
+    const buffer = this.canvas.toBuffer("image/png");
 
     return new AttachmentBuilder(buffer, {
       name,
