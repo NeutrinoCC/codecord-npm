@@ -37,9 +37,10 @@ export default class Client {
     const module = fs.readdirSync(absoluteModulePath);
 
     for (const folder of module) {
-      const folderPath = path.join(absoluteModulePath, folder);
+      const folderPath = path.join(modulePath, folder);
+      const absoluteFolderPath = path.join(absoluteModulePath, folder);
 
-      if (!isDirectory(folderPath)) continue;
+      if (!isDirectory(absoluteFolderPath)) continue;
 
       switch (folder) {
         case "commands":
@@ -57,6 +58,8 @@ export default class Client {
   }
 
   readCommands(folderPath: string) {
+    console.log(folderPath);
+
     const absoluteFolderPath = path.join(process.cwd(), folderPath);
 
     const files = fs
