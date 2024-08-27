@@ -58,8 +58,6 @@ export default class Client {
   }
 
   readCommands(folderPath: string) {
-    console.log(folderPath);
-
     const absoluteFolderPath = path.join(process.cwd(), folderPath);
 
     const files = fs
