@@ -1,52 +1,94 @@
 import fs from "fs";
+import path from "path";
+import ini, { parse } from "ini";
+import { ConfigOptions } from "./types";
 
-const filePath = `./config.ini`;
+const iniFileName = "config.ini";
+const iniFilePath = path.join(process.cwd(), iniFileName);
 
-/**
- * Creates the config.ini file if it doesn't exist.
- */
-function create(): void {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, "", "utf-8");
-  }
-}
-
-/**
-
-   * Reads the config.ini file and returns its contents as a string.
-
-   * @returns The contents of the config.ini file.
-
-   */
-function readIniFile(): string {
-  create();
-
-  return fs.readFileSync(filePath, "utf8");
-}
-
+// config.ini file manager
 export class Ini {
   /**
-
-   * Retrieves the value of a specific key from the config.ini file.
-
-   * @param query The key to retrieve the value for.
-
-   * @returns The value associated with the key, or null if not found.
-
+   * Creates a .ini config file
    */
+  private static createConfigFile() {
+    // tests if the file exists
+    if (fs.existsSync(iniFilePath)) return;
 
-  static get(query: string): string | null {
-    const fileContent = readIniFile();
+    // creates a new file
+    fs.writeFileSync(iniFilePath, "", "utf-8");
+  }
 
-    const regex = new RegExp(`^${query}=([^\\s]+)`, "m");
+  /**
+   * Returns configuration into an object structure
+   */
+  private static readIniFile() {
+    if (!fs.existsSync(iniFilePath)) this.createConfigFile();
 
-    const match = fileContent.match(regex);
+    return fs.readFileSync(iniFilePath, "utf8");
+  }
 
-    if (!match) return null;
+  /**
+   * Loads the configuration to enviroment variables
+   * @param options
+   */
+  static config(options?: ConfigOptions) {
+    try {
+      // Read the .ini file
+      const content = this.readIniFile();
 
-    const value = match?.[1]?.trim() || null;
+      // parse the .ini data
+      const obj = ini.parse(content);
 
-    return value;
+      // set environment variables
+      for (const [key, value] of Object.entries(obj)) {
+        // Optionally handle sections if needed
+        if (typeof value === "object" && value !== null) {
+          if (options?.noSectionProperties) continue;
+
+          for (const [k, v] of Object.entries(value)) {
+            if (typeof v === "string") {
+              // Set environment variable
+              process.env[k] = v;
+            }
+          }
+        } else process.env[key] = value;
+      }
+    } catch (error) {
+      console.error("Error loading the configuration:", error);
+    }
+  }
+
+  /**
+   * Get an specific property of the configuration
+   * @param key
+   * @returns
+   */
+  static get(query?: string): any {
+    const content = this.readIniFile();
+
+    let result: any = ini.parse(content);
+
+    if (!query) return result;
+
+    const keys = query.split(".");
+
+    let i = keys.length;
+
+    for (let key of keys) {
+      i--;
+
+      let match = result[key];
+
+      if (i !== 0 && !match) {
+        result = null;
+        break;
+      }
+
+      result = match;
+    }
+
+    return result;
   }
 
   static parseGet(query: string): any {
@@ -66,30 +108,40 @@ export class Ini {
   }
 
   /**
-
-   * Sets the value of a specific key in the config.ini file.
-
-   * @param set An object containing key-value pairs to set.
-
+   * Sets the value of new keys to the config file
+   * @param set Keys to add to the config file
+   * @example Ini.set({
+   *  token: "MY_TOKEN",
+   *  guild: "GUILD_ID",
+   *  tickets: {
+   *    mentions: true
+   *    }
+   * });
    */
-
   static set(set: { [key: string]: any }): void {
-    const fileContent = readIniFile();
+    try {
+      const content = this.readIniFile();
 
-    const lines = fileContent.split("\n");
+      const parsedContent = ini.parse(content);
 
-    Object.keys(set).forEach((key) => {
-      const regex = new RegExp(`^${key}=([^\\s]+)`, "m");
+      for (const [key, value] of Object.entries(set)) {
+        // If value is a nested object
+        if (typeof value === "object" && value !== null) {
+          // Check for existing section or create a new one
+          let section = parsedContent[key];
 
-      const index = lines.findIndex((line) => regex.test(line));
+          if (!section || typeof section === "string") parsedContent[key] = {};
 
-      if (index !== -1) {
-        lines[index] = `${key}=${set[key]}`;
-      } else {
-        lines.push(`${key}=${set[key]}`);
+          for (const [k, v] of Object.entries(value)) {
+            parsedContent[key][k] = v;
+          }
+        } else parsedContent[key] = value;
       }
-    });
 
-    fs.writeFileSync(filePath, lines.join("\n"));
+      const updatedContent = ini.stringify(parsedContent);
+      fs.writeFileSync(iniFilePath, updatedContent, "utf8");
+    } catch (error) {
+      console.error("Error updating the configuration:", error);
+    }
   }
 }

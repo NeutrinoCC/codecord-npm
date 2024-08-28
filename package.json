@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/NeutrinoCC/codecord-utils#readme",
   "devDependencies": {
+    "@types/ini": "^4.1.1",
     "ts-node": "^10.9.2",
     "tsup": "^8.2.3",
     "typescript": "^5.5.4"
@@ -30,6 +31,8 @@
   "dependencies": {
     "@napi-rs/canvas": "^0.1.54",
     "color-thief-node": "^1.0.4",
-    "discord.js": "^14.15.3"
+    "discord.js": "^14.15.3",
+    "ini": "^4.1.3",
+    "mongoose": "^8.5.4"
   }
 }
