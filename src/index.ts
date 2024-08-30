@@ -13,8 +13,10 @@ import {
   Event,
 } from "./classes/client/responses";
 import { Branding } from "./classes/branding";
+import { MongoManager } from "./classes/mongoManager";
 
 export default {
+  MongoManager,
   Ini,
   Client,
   Collector,
@@ -32,6 +34,7 @@ export default {
 
 export {
   Ini,
+  MongoManager,
   Branding,
   Client,
   Collector,
