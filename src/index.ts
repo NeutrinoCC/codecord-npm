@@ -13,8 +13,12 @@ import {
   Event,
 } from "./classes/client/responses";
 import { Branding } from "./classes/branding";
+import { MongoManager } from "./classes/mongoManager";
+import { Timeout } from "./classes/timeout";
 
 export default {
+  Timeout,
+  MongoManager,
   Ini,
   Client,
   Collector,
@@ -32,6 +36,8 @@ export default {
 
 export {
   Ini,
+  Timeout,
+  MongoManager,
   Branding,
   Client,
   Collector,

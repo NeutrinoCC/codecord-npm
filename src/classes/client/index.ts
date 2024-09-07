@@ -11,7 +11,6 @@ import {
   Routes,
   Interaction as DjsInteraction,
   SnowflakeUtil,
-  SlashCommandBuilder,
 } from "discord.js";
 import ApiError from "../../errors/index";
 import { Command, Event, APIInteraction as Interaction } from "./responses";
@@ -73,7 +72,7 @@ export default class Client {
       if (command.default) command = command.default;
 
       if (command instanceof Command)
-        this.app.commands.set(command.name, command);
+        this.app.commands.set(command.data.name, command);
       else
         console.log(
           `${filePath} command needs to use Command class to be readed.`
@@ -173,6 +172,20 @@ export default class Client {
     await this.app.login(token);
   }
 
+  async eraseGuildCommands(token: string, guildId: string) {
+    const base64Id = token.split(".")[0];
+
+    if (!base64Id) throw new Error("No base64 client id could be parsed.");
+
+    const clientId = Buffer.from(base64Id, "base64").toString("ascii");
+
+    const rest = new REST().setToken(token);
+
+    await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+      body: [],
+    });
+  }
+
   async registerCommands(token: string, guildId?: string) {
     const base64Id = token.split(".")[0];
 
@@ -181,18 +194,10 @@ export default class Client {
     const clientId = Buffer.from(base64Id, "base64").toString("ascii");
 
     const Rest: REST = new REST().setToken(token);
-    const parsedCommands = this.app.commands.map((command) => {
-      const newObj: any = Object.assign({}, command.toJSON());
 
-      delete newObj["execute"];
-
-      return newObj;
-    });
-
-    let i = 1;
-    setInterval(() => {
-      i++;
-    }, 1000);
+    const parsedCommands = this.app.commands.map((command) =>
+      command.data.toJSON()
+    );
 
     // Registering the parsed commands
     const routes = guildId
@@ -204,19 +209,5 @@ export default class Client {
 
     // set an interaction handler to start listening commands
     this.app.on(Events.InteractionCreate, this.interactionHandler);
-  }
-
-  async fetchGuild(guildId: string) {
-    try {
-      SnowflakeUtil.decode(guildId);
-
-      const guild = await this.app.guilds.fetch(guildId).catch(() => null);
-
-      if (!guild) return;
-
-      return guild;
-    } catch (error) {
-      if (error instanceof Error) ApiError.throw("notSnowflake", guildId);
-    }
   }
 }
