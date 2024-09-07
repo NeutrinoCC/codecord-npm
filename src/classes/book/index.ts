@@ -45,9 +45,12 @@ export class Book {
   }
 
   async write() {
-    const render = (await this.render?.()) || {};
+    let render = await this.render?.();
 
-    if (this.interaction && this.interaction.replied)
+    if (
+      this.interaction &&
+      (this.interaction.replied || this.interaction.deferred)
+    )
       await this.interaction.editReply(render);
   }
 
@@ -79,7 +82,9 @@ export class Book {
   async slide(n: number) {
     this.paragraph += n;
 
-    const paragraphs = (await this.length?.()) || 0;
+    if (!this.pageLength) return;
+
+    const paragraphs = await this?.pageLength();
 
     if (this.paragraph <= 0) this.paragraph = paragraphs;
     else if (this.paragraph > paragraphs) this.paragraph = 1;
