@@ -1,7 +1,7 @@
-import mongoose, { SchemaDefinition } from "mongoose";
+import mongoose, { ConnectOptions, SchemaDefinition } from "mongoose";
 
 class DB {
-  private name: string;
+  name: string;
   model;
 
   constructor(name: string, schemaDefinition: SchemaDefinition) {
@@ -19,13 +19,29 @@ class DB {
         return await this.model.findOne({
           _id: data,
         });
-      else
-        return await this.model.find({
-          _id: data,
-        });
+      else return await this.model.find(data);
     } catch (error) {
       console.error(`MONGO GET ERROR IN ${this.name}:`, error);
       throw error;
+    }
+  }
+
+  async create(data: any) {
+    if (!this.model.validate(data)) return;
+
+    const _id = mongoose.Types.ObjectId;
+
+    try {
+      if (!data._id) data._id = new _id();
+
+      const entry = new this.model(data);
+
+      await entry.save();
+
+      return data._id;
+    } catch (error) {
+      console.error(`MONGO CREATE ERROR IN ${this.name}:`, error);
+      throw error; // Propagate error
     }
   }
 
@@ -48,6 +64,15 @@ class DB {
     } catch (error) {
       console.error(`MONGO SET ERROR IN ${this.name}:`, error);
       throw error; // Propagate error
+    }
+  }
+
+  // remove documents from collection
+  async delete(id: string) {
+    try {
+      await this.model.findByIdAndDelete(id);
+    } catch (error) {
+      console.log(error);
     }
   }
 }

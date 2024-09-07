@@ -9,6 +9,9 @@ import {
 } from "discord.js";
 import { InteractionListenersObject, InteractionListener } from "./types";
 import ApiError from "../../errors/index";
+import { Timeout } from "../timeout";
+
+const timeout = new Timeout({ maxStrikes: 20 });
 
 export class Collector {
   interaction: ChatInputCommandInteraction | MessageComponentInteraction;
@@ -109,8 +112,11 @@ export class Collector {
       timeMiliseconds?: number;
       title?: string;
       inputs: TextInputBuilder[];
+      timeout: boolean;
     }
   ) {
+    if (options.timeout && timeout.is(subInteraction.user.id)) return;
+
     const { timeMiliseconds, title, inputs } = options;
 
     const custom_id = `submission:${subInteraction.id}`;
@@ -141,6 +147,8 @@ export class Collector {
         submission.customId === custom_id
       );
     };
+
+    if (options.timeout) timeout.set(subInteraction.user.id, 2 * 60 * 1000);
 
     await subInteraction.showModal(modal);
 
