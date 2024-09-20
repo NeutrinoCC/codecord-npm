@@ -61,28 +61,29 @@ export class Branding {
     const banner = this.guild.bannerURL({ extension: "png" });
 
     if (banner) {
-      await portrait.drawImage({
+      /*await portrait.drawImage({
         imageURL: banner,
-        x: CoordinateReference["1/2"],
-        y: CoordinateReference["1/2"],
-        size: 1,
+        x: portrait.canvas.width / 2 - banner. / 2,
+        y: portrait.canvas.height
         centered: true,
         shadow: 15,
         frame: 5,
-      });
+      });*/
     }
 
     const icon = this.guild.iconURL({ extension: "png" });
 
     if (icon) {
+      let iconSize = 255;
+
       await portrait.drawImage({
         imageURL: icon,
         borderWidth: 5,
         borderColor: color.hex || "#FFFFFF",
-        x: CoordinateReference["1/2"],
-        y: CoordinateReference["1/3"],
-        size: 1,
-        centered: true,
+        x: portrait.canvas.width / 2 - iconSize / 2,
+        y: portrait.canvas.height / 2 - iconSize / 2,
+        width: 255,
+        height: 255,
         shadow: 15,
         frame: 5,
       });

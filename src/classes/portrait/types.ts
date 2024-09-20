@@ -12,14 +12,16 @@ export enum CoordinateReference {
 }
 
 export interface ImageOptions {
+  imageURL: string;
   borderWidth?: number;
   borderColor?: string;
   frame?: number;
-  imageURL: string;
-  size: number;
-  x: number | CoordinateReference;
-  y: number | CoordinateReference;
-  centered?: boolean;
+  x?: number;
+  y?: number;
+  height?: number;
+  width?: number;
+  justify?: "center" | "left" | "right";
+  align?: "center" | "top" | "bottom";
   shadow?: number;
 }
 

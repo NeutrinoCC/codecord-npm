@@ -65,12 +65,21 @@ export class Portrait {
     });
   }
 
+  /**
+   * Resets canvas to blank
+   */
+  clear() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
   async drawImage({
     imageURL,
-    size,
     x,
     y,
-    centered,
+    width,
+    height,
+    align,
+    justify,
     shadow,
     borderWidth,
     borderColor = "#FFFFFF",
@@ -80,54 +89,47 @@ export class Portrait {
 
     const image = await loadImage(imageURL);
 
-    let imageWidth = image.width * size;
-    let imageHeight = image.height * size;
+    // calculate image proportions
+    if (!width) width = image.width;
+    if (!height) height = image.height;
+
+    if (!x) x = 0;
+    if (!y) y = 0;
 
     // Calculate the x and y coordinates
+    if (align === "center") y += this.canvas.height / 2 - height / 2;
+    else if (align === "bottom") y += this.canvas.height - height;
 
-    let coord_x: number;
-    let coord_y: number;
-
-    coord_x =
-      typeof x !== "number"
-        ? (coord_x = calculateCoordinateReference(x, this.canvas.width))
-        : x;
-
-    coord_y =
-      typeof y !== "number"
-        ? (coord_y = calculateCoordinateReference(y, this.canvas.height))
-        : y;
-
-    if (centered) {
-      coord_x -= imageWidth / 2;
-      coord_y -= imageHeight / 2;
-    }
+    if (justify === "center") x += this.canvas.width / 2 - width / 2;
+    else if (justify === "right") x += this.canvas.width - width;
 
     // Draw the image
     if (frame === 0 || frame === undefined) {
+      // shadow
+      if (shadow) {
+        this.ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+        this.ctx.shadowBlur = shadow;
+        this.ctx.shadowOffsetX = 5;
+        this.ctx.shadowOffsetY = 5;
+      }
+
       // Draw the border
       if (borderWidth) {
         // Draw the shadow
-        if (shadow) {
-          this.ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-          this.ctx.shadowBlur = shadow;
-          this.ctx.shadowOffsetX = 5;
-          this.ctx.shadowOffsetY = 5;
-        }
-
         this.ctx.fillStyle = borderColor;
 
         this.ctx.fillRect(
-          coord_x - borderWidth,
-          coord_y - borderWidth,
-          imageWidth + borderWidth * 2,
-          imageHeight + borderWidth * 2
+          x - borderWidth,
+          y - borderWidth,
+          width + borderWidth * 2,
+          height + borderWidth * 2
         );
+
+        // if there is border, then we delete the shadow for the image
+        this.ctx.shadowColor = "transparent";
       }
 
-      if (shadow && borderWidth) this.ctx.shadowColor = "transparent";
-
-      this.ctx.drawImage(image, coord_x, coord_y, imageWidth, imageHeight);
+      this.ctx.drawImage(image, x, y, width, height);
     } else {
       // Draw the shadow
       if (shadow) {
@@ -138,13 +140,12 @@ export class Portrait {
       }
 
       // Draw the border
-
       if (borderWidth) {
         this.ctx.save();
 
-        const curveRadius = Math.min(imageWidth, imageHeight) * (frame / 100);
+        const curveRadius = Math.min(width, height) * (frame / 100);
 
-        this.roundRect(coord_x, coord_y, imageWidth, imageHeight, curveRadius);
+        this.roundRect(x, y, width, height, curveRadius);
 
         this.ctx.clip();
 
@@ -152,14 +153,14 @@ export class Portrait {
 
         this.ctx.stroke();
 
-        this.ctx.fillRect(coord_x, coord_y, imageWidth, imageHeight);
+        this.ctx.fillRect(x, y, width, height);
 
         this.ctx.restore();
 
-        imageWidth -= borderWidth * 2;
-        imageHeight -= borderWidth * 2;
-        coord_x += borderWidth;
-        coord_y += borderWidth;
+        width -= borderWidth * 2;
+        height -= borderWidth * 2;
+        x += borderWidth;
+        y += borderWidth;
       }
 
       // Create a rounded rectangle
@@ -169,24 +170,23 @@ export class Portrait {
       this.ctx.beginPath();
 
       // Curve radius as a percentage of the image size
+      const curveRadius = Math.min(width, height) * (frame / 100);
 
-      const curveRadius = Math.min(imageWidth, imageHeight) * (frame / 100);
+      this.roundRect(x, y, width, height, curveRadius);
 
-      this.roundRect(coord_x, coord_y, imageWidth, imageHeight, curveRadius);
-
-      /*this.ctx.arc(
-        coord_x + imageWidth / 2,
-        coord_y + imageHeight / 2,
-        Math.min(imageWidth, imageHeight) / 2,
+      this.ctx.arc(
+        x + width / 2,
+        y + height / 2,
+        Math.min(width, height) / 2,
         0,
         Math.PI * 2
-      );*/
+      );
 
       this.ctx.clip();
 
       // Draw the image
 
-      this.ctx.drawImage(image, coord_x, coord_y, imageWidth, imageHeight);
+      this.ctx.drawImage(image, x, y, width, height);
 
       this.ctx.restore();
     }
